@@ -4,7 +4,7 @@ dotenv.config();
 
 const { TOKEN, CLIENT_ID, GUILD_ID_2, RIOT_API_KEY, GUILD_ID } = process.env;
 
-if (!TOKEN || !CLIENT_ID || !GUILD_ID_2 || !RIOT_API_KEY) {
+if (!TOKEN || !CLIENT_ID || !GUILD_ID_2 || !RIOT_API_KEY || !GUILD_ID) {
   throw new Error("Missing environment variables");
 }
 

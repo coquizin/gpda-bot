@@ -42,7 +42,7 @@ export interface Metadata {
   participants: string[];
 }
 
-interface Participant {
+export interface Participant {
   assists: number;
   baronKills: number;
   bountyLevel: number;
@@ -176,6 +176,11 @@ export interface matchHistory {
   visionWardsBoughtInGame: number;
 }
 
+export type MatchHistory = {
+  participant: Participant;
+  info: Omit<Info, "participants">;
+};
+
 export interface Entries {
   leagueId: string;
   queueType: string;
@@ -197,3 +202,10 @@ export type RawResponse<T> = {
   statusText: string;
   data: T;
 };
+
+export enum GameModes {
+  CLASSIC = "RANKED SOLO/DUO",
+  ARAM = "ARAM",
+  URF = "URF",
+  TFT = "TFT",
+}

@@ -9,21 +9,21 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction: CommandInteraction) {
   const userRiotData = userData.getUserData();
-  const useR = userRiotData[interaction.user.id];
+  const user = userRiotData[interaction.user.id];
 
-  if (!useR) {
+  if (!user) {
     interaction.reply(
-      "Please set your Riot Name and Region using /setUser first."
+      "Please set your Riot Name and Region using /league first."
     );
 
     return;
   }
 
   const latestVersion = await riotUtils.getLatestVersion();
-  const { gameName, server, tagLine } = useR;
+  const { puuid, server, tagLine } = user;
 
   try {
-    const summonerData = await riotUtils.getLeagueSummoner(gameName, server);
+    const summonerData = await riotUtils.getLeagueSummoner(puuid, server);
 
     const summonerName = summonerData.name;
     const summonerLevel = summonerData.summonerLevel.toString();

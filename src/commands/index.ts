@@ -4,6 +4,7 @@ import * as serverModule from "./utility/server";
 import * as lolmeModule from "./league/lolme";
 import * as setLoLModule from "./league/league";
 import * as dogModule from "./restAPI/dog";
+import * as lolhistoryModule from "./league/lolHist";
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
 
 // Definindo tipos para os módulos
@@ -19,6 +20,7 @@ interface Commands {
   dog: Command;
   lolme: Command;
   league: Command;
+  lolhist: Command;
 }
 
 // Criando um objeto com os módulos e suas propriedades de comando
@@ -29,4 +31,5 @@ export const commands: Commands = {
   lolme: lolmeModule,
   dog: dogModule,
   league: setLoLModule,
+  lolhist: lolhistoryModule,
 };

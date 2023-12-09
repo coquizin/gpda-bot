@@ -1,5 +1,5 @@
 import { Client } from "discord.js";
-import { config } from "src/config/config";
+import { config } from "../config/config";
 import { deployCommands } from "src/deploy-command";
 
 export default (client: Client): void => {
@@ -7,7 +7,7 @@ export default (client: Client): void => {
     if (!client.user || !client.application) {
       return;
     }
-    await deployCommands({ guildId: config.GUILD_ID_2 });
+    await deployCommands({ guildId: config.GUILD_ID });
     console.log(`${client.user.username} bot is ready! 🤖`);
   });
 };
