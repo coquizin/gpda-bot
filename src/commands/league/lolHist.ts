@@ -6,15 +6,84 @@ import {
   ActionRowBuilder,
   ComponentType,
 } from "discord.js";
-import riotUtils from "./utilsLeague";
-import userData from "./userData";
+import riotUtils from "../../utils/utilsLeague";
+import { getUserData } from "src/service/supabase/User";
+import { messages } from "src/utils/messages";
+import {
+  createMatchHistory,
+  getSummerbyNameTag,
+  listMatch,
+} from "src/service/riot";
+import { UserData } from "src/entities/User";
 
 export const data = new SlashCommandBuilder()
   .setName("lolhist")
-  .setDescription("Get user's League of Legends History");
+  .setDescription("Histórico do jogador")
+  .addStringOption((option) =>
+    option.setName("name").setDescription("Nome do jogador").setRequired(false)
+  )
+  .addStringOption((option) =>
+    option
+      .setName("tag")
+      .setDescription("Riot Tag, não inclua #")
+      .setRequired(false)
+  )
+  .addStringOption((option) =>
+    option
+      .setName("server")
+      .setDescription("server (e.g., br1)")
+      .setRequired(false)
+  );
 
 export async function execute(interaction: CommandInteraction) {
-  const userRiotData = userData.getUserData();
+  let user: UserData | null = null;
+  const gameName = interaction.options.get("name")?.value as string;
+  const tagLine = interaction.options.get("tag")?.value as string;
+  let server = interaction.options.get("server")?.value
+    ? (interaction.options.get("server")?.value as string)
+    : "br1";
+
+  if (gameName || tagLine) {
+    if (!gameName) {
+      interaction.reply(messages.missingArgs);
+      return;
+    }
+
+    if (!tagLine) {
+      interaction.reply(messages.missingArgs);
+      return;
+    }
+
+    tagLine.toString().replace("#", "");
+
+    const region = riotUtils.getRegion(server);
+
+    const response = await getSummerbyNameTag(gameName, tagLine, region);
+
+    if (!response) {
+      interaction.reply(messages.errorFetch);
+      return;
+    }
+
+    user = {
+      id: "",
+      gameName: response.data.gameName,
+      tagLine: response.data.tagLine,
+      region,
+      server,
+      puuid: response.data.puuid,
+      id_discord: interaction.user.id,
+    };
+  } else {
+    user = await getUserData(interaction.user.id);
+  }
+
+  if (!user) {
+    interaction.reply(messages.userNull);
+    return;
+  }
+
+  const userData = user;
 
   const prevPage = new ButtonBuilder()
     .setCustomId("prevPage")
@@ -32,15 +101,6 @@ export async function execute(interaction: CommandInteraction) {
     components: [prevPage, nextPage],
   });
 
-  const user = userRiotData[interaction.user.id];
-
-  if (!user) {
-    interaction.reply(
-      "Please set your Riot Name and Region using /league first."
-    );
-    return;
-  }
-
   // const user = {
   //   gameName: "coquizin",
   //   tagLine: "777",
@@ -51,19 +111,21 @@ export async function execute(interaction: CommandInteraction) {
   // };
 
   try {
-    const matchHistory = await riotUtils.createMatchHistory(
-      user.puuid,
-      user.region
+    const matchListId = await listMatch(userData.puuid, userData.region, 0, 20);
+    const maxPage = matchListId.length;
+    const matchHistory = await createMatchHistory(
+      userData.puuid,
+      userData.region,
+      matchListId[0]
     );
 
     const embed = await riotUtils.createEmbedMatchHistory(
       matchHistory,
-      user,
+      userData,
       0
     );
 
     let currentPage = 0;
-    const maxPage = 20;
     const resultsPerPage = 1;
 
     const sentMessage = await interaction.reply({
@@ -109,22 +171,22 @@ export async function execute(interaction: CommandInteraction) {
     });
 
     async function updateEmbed() {
-      const matchHistory = await riotUtils.createMatchHistory(
-        user.puuid,
-        user.region,
-        currentPage
+      const matchHistory = await createMatchHistory(
+        userData.puuid,
+        userData.region,
+        matchListId[currentPage]
       );
 
       const newEmbed = await riotUtils.createEmbedMatchHistory(
         matchHistory,
-        user,
+        userData,
         currentPage
       );
 
       sentMessage.edit({ embeds: [newEmbed] }).catch(console.error);
     }
   } catch (error) {
-    console.error("Error fetching user data:", error);
-    interaction.reply("Error fetching user data. Please try again later.");
+    console.log(error);
+    interaction.reply(messages.errorFetch);
   }
 }

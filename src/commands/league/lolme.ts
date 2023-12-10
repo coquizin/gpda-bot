@@ -1,61 +1,63 @@
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
-import riotUtils from "./utilsLeague";
-import userData from "./userData";
+import riotUtils from "../../utils/utilsLeague";
 import { EmbedBuilder } from "discord.js";
+import { getUserData } from "src/service/supabase/User";
+import { messages } from "src/utils/messages";
+import {
+  getLatestVersion,
+  getLeagueSummoner,
+  getRankedInfo,
+} from "src/service/riot";
 
 export const data = new SlashCommandBuilder()
   .setName("lolme")
-  .setDescription("Get user's League of Legends information");
+  .setDescription("Obtenha informações do seu perfil do League of Legends");
 
 export async function execute(interaction: CommandInteraction) {
-  const userRiotData = userData.getUserData();
-  const user = userRiotData[interaction.user.id];
+  const data = await getUserData(interaction.user.id);
+
+  const user = data;
 
   if (!user) {
-    interaction.reply(
-      "Please set your Riot Name and Region using /league first."
-    );
+    interaction.reply(messages.userNull);
 
     return;
   }
 
-  const latestVersion = await riotUtils.getLatestVersion();
+  const latestVersion = await getLatestVersion();
   const { puuid, server, tagLine } = user;
 
   try {
-    const summonerData = await riotUtils.getLeagueSummoner(puuid, server);
+    const summonerData = await getLeagueSummoner(puuid, server);
 
     const summonerName = summonerData.name;
     const summonerLevel = summonerData.summonerLevel.toString();
     const profileIconId = summonerData.profileIconId.toString();
     const leagueId = summonerData.id.toString();
     const icon = riotUtils.getLeagueIcon(profileIconId, latestVersion);
-
-    const leagueInfo = await riotUtils.getRankedInfo(
-      leagueId,
-      server,
-      "RANKED_SOLO_5x5"
-    );
+    const championImage = riotUtils.getChampionImage("Vayne", 13);
+    const leagueInfo = await getRankedInfo(leagueId, server, "RANKED_SOLO_5x5");
 
     const tier = leagueInfo ? leagueInfo.tier : "Unranked";
     const rank = leagueInfo ? leagueInfo.rank : "";
     const wins = leagueInfo ? leagueInfo.wins : 0;
     const losses = leagueInfo ? leagueInfo.losses : 0;
+    const winrate =
+      wins + losses !== 0 ? ((wins / (wins + losses)) * 100).toFixed(2) : "N/A";
     const lp = leagueInfo ? leagueInfo.leaguePoints.toString() : 0;
 
     const embed = new EmbedBuilder()
-      .setDescription("League of Legends Information")
       .setColor("#0099ff")
       .setAuthor({
-        name: summonerName,
+        name: `${summonerName} #${tagLine}`,
         iconURL: icon,
       })
       .setThumbnail(icon)
       .addFields(
-        {
-          name: "Summoner Name",
-          value: `${summonerName} #${tagLine}`,
-        },
+        // {
+        //   name: "Nick de Invocador",
+        //   value: `${summonerName} #${tagLine}`,
+        // },
         { name: "Level", value: summonerLevel, inline: true },
         {
           name: "Server",
@@ -68,18 +70,18 @@ export async function execute(interaction: CommandInteraction) {
           inline: true,
         },
         {
-          name: "Wins",
+          name: "Vitórias",
           value: `${wins}`,
           inline: true,
         },
         {
-          name: "Losses",
+          name: "Derrrotas",
           value: `${losses}`,
           inline: true,
         },
         {
           name: "Win Rate",
-          value: `${((wins / (wins + losses)) * 100).toFixed(2)}%`,
+          value: `${winrate}%`,
           inline: true,
         },
         {
@@ -88,6 +90,7 @@ export async function execute(interaction: CommandInteraction) {
           inline: true,
         }
       )
+      .setImage(championImage)
       .setTimestamp()
       .setFooter({
         text: "GPDA BOT",
@@ -96,8 +99,8 @@ export async function execute(interaction: CommandInteraction) {
 
     interaction.reply({ embeds: [embed] });
   } catch (error: any) {
-    console.error("Error fetching user data:", error);
-    interaction.reply("Error fetching user data. Please try again later.");
+    console.log(error);
+    interaction.reply(messages.errorFetch);
   }
 }
 

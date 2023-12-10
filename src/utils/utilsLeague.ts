@@ -1,15 +1,15 @@
 const { default: axios } = require("axios");
 import { EmbedBuilder } from "discord.js";
-import { config } from "../../config/config";
+import { config } from "../config/config";
 import {
   Entries,
   Match,
   MatchHistory,
   RawResponse,
   SummonerV4,
-  matchHistory,
-} from "./type";
-import { UserData } from "./userData";
+} from "../commands/league/types/type";
+import { UserData } from "src/entities/User";
+import { getLatestVersion } from "src/service/riot";
 
 const riotUtils = {
   getRegion: function (server: string): string {
@@ -69,113 +69,10 @@ const riotUtils = {
     return "";
   },
 
-  getLatestVersion: async function (): Promise<string> {
-    const response = await axios.get(
-      "https://ddragon.leagueoflegends.com/api/versions.json"
-    );
-    const versions = response.data;
-    return versions[0];
-  },
-
   getLeagueIcon: function (iconId: string, version: string): string {
     const icon = `https://ddragon.leagueoflegends.com/cdn/${version}/img/profileicon/${iconId}.png`;
 
     return icon;
-  },
-
-  getLeagueSummoner: async function (
-    puuid: string,
-    server: string
-  ): Promise<SummonerV4> {
-    const response = await axios.get(
-      `https://${server}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${puuid}`,
-      {
-        headers: {
-          "X-Riot-Token": config.RIOT_API_KEY,
-        },
-      }
-    );
-
-    return response.data;
-  },
-
-  listMatch: async function (
-    puuid: string,
-    region: string,
-    start: number = 0,
-    count: number = 1
-  ): Promise<string[]> {
-    const response = await axios.get(
-      `https://${region}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?start=${start}&count=${count}`,
-      {
-        headers: {
-          "X-Riot-Token": config.RIOT_API_KEY,
-        },
-      }
-    );
-
-    return response.data;
-  },
-
-  getMatch: async function (matchId: string, region: string): Promise<Match> {
-    const response = await axios.get(
-      `https://${region}.api.riotgames.com/lol/match/v5/matches/${matchId}`,
-      {
-        headers: {
-          "X-Riot-Token": config.RIOT_API_KEY,
-        },
-      }
-    );
-
-    return response.data;
-  },
-
-  createMatchHistory: async function (
-    puuid: string,
-    region: string,
-    start: number = 0
-  ): Promise<MatchHistory[]> {
-    const matchListId = await riotUtils.listMatch(puuid, region, start);
-    const matchHistory = [] as MatchHistory[];
-
-    for (const matchId of matchListId) {
-      const match = await riotUtils.getMatch(matchId, region);
-      const { info } = match;
-
-      const { participants, ...restInfo } = info;
-
-      const participantId = participants.findIndex(
-        (participant) => participant.puuid === puuid
-      );
-
-      const participant = participants[participantId];
-      const matchData = { participant, info: restInfo };
-
-      matchHistory.push(matchData);
-    }
-
-    return matchHistory;
-  },
-
-  getRankedInfo: async function (
-    summonerId: string,
-    server: string,
-    queueType: string
-  ) {
-    const response: RawResponse<Entries[]> = await axios.get(
-      `https://${server}.api.riotgames.com/lol/league/v4/entries/by-summoner/${summonerId}`,
-      {
-        headers: {
-          "X-Riot-Token": config.RIOT_API_KEY,
-        },
-      }
-    );
-
-    const soloInfo = response.data.find(
-      (queue) => queue.queueType === queueType
-    );
-
-    return soloInfo;
   },
 
   getChampionSquareImage: function (championName: string, version: string) {
@@ -184,8 +81,8 @@ const riotUtils = {
     return championImage;
   },
 
-  getChampionImage: function (championName: string) {
-    const championImage = `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${championName}_0.jpg`;
+  getChampionImage: function (championName: string, skin: number = 0) {
+    const championImage = `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${championName}_${skin}.jpg`;
 
     return championImage;
   },
@@ -218,7 +115,7 @@ const riotUtils = {
     user: UserData,
     currentPage: number
   ) {
-    const latestVersion = await riotUtils.getLatestVersion();
+    const latestVersion = await getLatestVersion();
 
     const championSquareImage = riotUtils.getChampionSquareImage(
       matchHistory[0].participant.championName,

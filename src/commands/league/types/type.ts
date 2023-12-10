@@ -1,22 +1,12 @@
-export interface AccountV1 {
-  puuid: string;
-  gameName: string;
-  tagLine: string;
-}
-
-export interface SummonerV4 {
-  id: string;
-  accountId: string;
-  puuid: string;
-  name: string;
-  profileIconId: number;
-  revisionDate: number;
-  summonerLevel: number;
-}
-
 export interface Match {
   metadata: Metadata;
   info: Info;
+}
+
+export interface Metadata {
+  dataVersion: string;
+  matchId: string;
+  participants: string[];
 }
 
 export interface Info {
@@ -34,12 +24,6 @@ export interface Info {
   queueId: number;
   teams: Team[];
   tournamentCode: string;
-}
-
-export interface Metadata {
-  dataVersion: string;
-  matchId: string;
-  participants: string[];
 }
 
 export interface Participant {
@@ -149,6 +133,22 @@ export interface Participant {
   win: boolean;
 }
 
+export interface AccountV1 {
+  puuid: string;
+  gameName: string;
+  tagLine: string;
+}
+
+export interface SummonerV4 {
+  id: string;
+  accountId: string;
+  puuid: string;
+  name: string;
+  profileIconId: number;
+  revisionDate: number;
+  summonerLevel: number;
+}
+
 interface Team {
   bans: Ban[];
   objectives: Objective[];
@@ -208,4 +208,10 @@ export enum GameModes {
   ARAM = "ARAM",
   URF = "URF",
   TFT = "TFT",
+}
+
+export interface SummonerData {
+  gameName: string;
+  tagLine: string;
+  puuid: string;
 }
