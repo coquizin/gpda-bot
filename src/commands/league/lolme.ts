@@ -1,21 +1,28 @@
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
 import riotUtils from "../../utils/utilsLeague";
-import { EmbedBuilder } from "discord.js";
-import { getUserData } from "src/service/supabase/User";
-import { messages } from "src/utils/messages";
+import { getUserData } from "../../service/supabase/user";
+import { messages } from "../../utils/messages";
 import {
+  getAllChampions,
   getLatestVersion,
-  getLeagueSummoner,
-  getRankedInfo,
-} from "src/service/riot";
+  getMasteries,
+} from "../../service/riot";
+import { getUserStyle } from "../../service/supabase/profile_style";
 
 export const data = new SlashCommandBuilder()
   .setName("lolme")
   .setDescription("Obtenha informações do seu perfil do League of Legends");
 
 export async function execute(interaction: CommandInteraction) {
-  const data = await getUserData(interaction.user.id);
+  const data = await getUserData({ id_discord: interaction.user.id });
+  const userStyle = await getUserStyle(interaction.user.id);
+  const latestVersion = await getLatestVersion();
+  const allChampions = await getAllChampions(latestVersion);
+  const sentMessage = await interaction.reply("Carregando...");
 
+  let championName = "Garen";
+  let skin = 0;
+  let color = "#000000";
   const user = data;
 
   if (!user) {
@@ -24,83 +31,37 @@ export async function execute(interaction: CommandInteraction) {
     return;
   }
 
-  const latestVersion = await getLatestVersion();
-  const { puuid, server, tagLine } = user;
+  const { puuid, server } = user;
+
+  if (userStyle && userStyle.champion && userStyle.skin) {
+    championName = userStyle.champion;
+    skin = userStyle.skin;
+  } else {
+    const masteries = await getMasteries(puuid, server, 1);
+    const championId = masteries[0].championId;
+
+    for (const champion in allChampions) {
+      if (allChampions[champion].key === championId.toString()) {
+        championName = allChampions[champion].id;
+        break;
+      }
+    }
+  }
 
   try {
-    const summonerData = await getLeagueSummoner(puuid, server);
+    const embed = await riotUtils.createEmbdedProfile(
+      user,
+      championName,
+      skin,
+      server,
+      color,
+      latestVersion
+    );
 
-    const summonerName = summonerData.name;
-    const summonerLevel = summonerData.summonerLevel.toString();
-    const profileIconId = summonerData.profileIconId.toString();
-    const leagueId = summonerData.id.toString();
-    const icon = riotUtils.getLeagueIcon(profileIconId, latestVersion);
-    const championImage = riotUtils.getChampionImage("Vayne", 13);
-    const leagueInfo = await getRankedInfo(leagueId, server, "RANKED_SOLO_5x5");
-
-    const tier = leagueInfo ? leagueInfo.tier : "Unranked";
-    const rank = leagueInfo ? leagueInfo.rank : "";
-    const wins = leagueInfo ? leagueInfo.wins : 0;
-    const losses = leagueInfo ? leagueInfo.losses : 0;
-    const winrate =
-      wins + losses !== 0 ? ((wins / (wins + losses)) * 100).toFixed(2) : "N/A";
-    const lp = leagueInfo ? leagueInfo.leaguePoints.toString() : 0;
-
-    const embed = new EmbedBuilder()
-      .setColor("#0099ff")
-      .setAuthor({
-        name: `${summonerName} #${tagLine}`,
-        iconURL: icon,
-      })
-      .setThumbnail(icon)
-      .addFields(
-        // {
-        //   name: "Nick de Invocador",
-        //   value: `${summonerName} #${tagLine}`,
-        // },
-        { name: "Level", value: summonerLevel, inline: true },
-        {
-          name: "Server",
-          value: server.toUpperCase(),
-          inline: true,
-        },
-        {
-          name: "Rank",
-          value: `${tier} ${rank} ${lp} LP`,
-          inline: true,
-        },
-        {
-          name: "Vitórias",
-          value: `${wins}`,
-          inline: true,
-        },
-        {
-          name: "Derrrotas",
-          value: `${losses}`,
-          inline: true,
-        },
-        {
-          name: "Win Rate",
-          value: `${winrate}%`,
-          inline: true,
-        },
-        {
-          name: "Queue Type",
-          value: "Ranked Solo/Duo",
-          inline: true,
-        }
-      )
-      .setImage(championImage)
-      .setTimestamp()
-      .setFooter({
-        text: "GPDA BOT",
-        iconURL: "https://i.imgur.com/AfFp7pu.png",
-      });
-
-    interaction.reply({ embeds: [embed] });
+    sentMessage.edit({ embeds: [embed], content: "" });
   } catch (error: any) {
     console.log(error);
-    interaction.reply(messages.errorFetch);
+    sentMessage.edit(messages.errorFetch);
   }
 }
 

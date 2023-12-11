@@ -5,20 +5,24 @@ import {
   ButtonStyle,
   ActionRowBuilder,
   ComponentType,
+  EmbedBuilder,
 } from "discord.js";
 import riotUtils from "../../utils/utilsLeague";
 import { getUserData } from "../../service/supabase/user";
 import { messages } from "../../utils/messages";
 import {
   createMatchHistory,
+  getActiveGame,
+  getLeagueSummoner,
+  getRankedInfo,
   getSummerbyNameTag,
   listMatch,
 } from "../../service/riot";
 import { UserData } from "src/entities/User";
 
 export const data = new SlashCommandBuilder()
-  .setName("lolhist")
-  .setDescription("Histórico do jogador")
+  .setName("lolspec")
+  .setDescription("Ver se o seu time está online")
   .addStringOption((option) =>
     option.setName("name").setDescription("Nome do jogador").setRequired(false)
   )
@@ -37,6 +41,8 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction: CommandInteraction) {
   let user: UserData | null = null;
+  const sentMessage = await interaction.reply("Carregando...");
+
   const gameName = interaction.options.get("name")?.value as string;
   const tagLine = interaction.options.get("tag")?.value;
   let server = interaction.options.get("server")?.value
@@ -45,12 +51,12 @@ export async function execute(interaction: CommandInteraction) {
 
   if (gameName || tagLine) {
     if (!gameName) {
-      interaction.reply(messages.missingArgs);
+      sentMessage.edit(messages.missingArgs);
       return;
     }
 
     if (!tagLine) {
-      interaction.reply(messages.missingArgs);
+      sentMessage.edit(messages.missingArgs);
       return;
     }
 
@@ -67,7 +73,7 @@ export async function execute(interaction: CommandInteraction) {
     );
 
     if (!response) {
-      interaction.reply(messages.errorFetch);
+      sentMessage.edit(messages.errorFetch);
       return;
     }
 
@@ -85,7 +91,7 @@ export async function execute(interaction: CommandInteraction) {
   }
 
   if (!user) {
-    interaction.reply(messages.userNull);
+    sentMessage.edit(messages.userNull);
     return;
   }
 
@@ -106,29 +112,61 @@ export async function execute(interaction: CommandInteraction) {
   const row = new ActionRowBuilder<ButtonBuilder>({
     components: [prevPage, nextPage],
   });
+  let currentPage = 0;
+  const maxPage = 2;
 
   try {
-    const matchListId = await listMatch(userData.puuid, userData.region, 0, 20);
-    const maxPage = matchListId.length;
-    const matchHistory = await createMatchHistory(
+    const summonerData = await getLeagueSummoner(
       userData.puuid,
-      userData.region,
-      matchListId[0]
+      userData.server
     );
 
-    const embed = await riotUtils.createEmbedMatchHistory(
-      matchHistory,
-      userData,
-      0
+    const activeMatch = await getActiveGame(summonerData.id, userData.server);
+
+    const usersData: any = [];
+
+    for (const player of activeMatch.participants) {
+      const leagueInfo = await getRankedInfo(
+        player.summonerId,
+        server,
+        "RANKED_SOLO_5x5"
+      );
+
+      const tier = leagueInfo ? leagueInfo.tier : "Unranked";
+      const rank = leagueInfo ? leagueInfo.rank : "";
+      const wins = leagueInfo ? leagueInfo.wins : 0;
+      const losses = leagueInfo ? leagueInfo.losses : 0;
+      const winrate =
+        wins + losses !== 0
+          ? ((wins / (wins + losses)) * 100).toFixed(2)
+          : "N/A";
+      const lp = leagueInfo ? leagueInfo.leaguePoints.toString() : 0;
+
+      const user = {
+        summonerName: player.summonerName,
+        teamId: player.teamId,
+        championId: player.championId,
+        tier,
+        rank,
+        lp,
+        winrate,
+        wins,
+        losses,
+      };
+
+      usersData.push(user);
+    }
+
+    const embed = await riotUtils.createEmbedMatch(
+      activeMatch,
+      usersData,
+      currentPage
     );
 
-    let currentPage = 0;
-    const resultsPerPage = 1;
-
-    const sentMessage = await interaction.reply({
+    sentMessage.edit({
       embeds: [embed],
       components: [row],
-      fetchReply: true,
+      content: "",
     });
 
     const collector = sentMessage.createMessageComponentCollector({
@@ -148,7 +186,7 @@ export async function execute(interaction: CommandInteraction) {
       }
 
       if (i.customId === "nextPage") {
-        if ((currentPage + 1) * resultsPerPage < maxPage) {
+        if (currentPage + 1 < maxPage) {
           currentPage++;
           await updateEmbed();
         } else {
@@ -168,15 +206,9 @@ export async function execute(interaction: CommandInteraction) {
     });
 
     async function updateEmbed() {
-      const matchHistory = await createMatchHistory(
-        userData.puuid,
-        userData.region,
-        matchListId[currentPage]
-      );
-
-      const newEmbed = await riotUtils.createEmbedMatchHistory(
-        matchHistory,
-        userData,
+      const newEmbed = await riotUtils.createEmbedMatch(
+        activeMatch,
+        usersData,
         currentPage
       );
 
@@ -184,6 +216,6 @@ export async function execute(interaction: CommandInteraction) {
     }
   } catch (error) {
     console.log(error);
-    interaction.reply(messages.errorFetch);
+    sentMessage.edit(messages.userNotInGame);
   }
 }

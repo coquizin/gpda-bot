@@ -2,13 +2,17 @@ import { SlashCommandBuilder, CommandInteraction } from "discord.js";
 import axios from "axios";
 import { config } from "../../config/config";
 import riotUtils from "../../utils/utilsLeague";
-import { createUserData, getUserData } from "../../service/supabase/user";
+import {
+  createUserData,
+  getUserData,
+  updateUserData,
+} from "../../service/supabase/user";
 import { messages } from "../../utils/messages";
 import { SummonerData } from "./types/type";
 
 export const data = new SlashCommandBuilder()
-  .setName("league")
-  .setDescription("Cadastre sua conta do League of Legends")
+  .setName("leagueup")
+  .setDescription("Atualize sua conta de League of Legends")
   .addStringOption((option) =>
     option.setName("name").setDescription("Riot Nickname").setRequired(true)
   )
@@ -28,8 +32,8 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction: CommandInteraction) {
   const user = await getUserData({ id_discord: interaction.user.id });
 
-  if (user) {
-    interaction.reply(messages.userExists);
+  if (!user) {
+    interaction.reply(messages.userNull);
 
     return;
   }
@@ -41,8 +45,8 @@ export async function execute(interaction: CommandInteraction) {
   tagLine?.toString().toUpperCase().replace("#", "");
   gameName.toString().replaceAll(" ", "%20");
 
-  server = riotUtils.getSaneServer(server as string);
   const region = riotUtils.getRegion(server as string);
+  server = riotUtils.getSaneServer(server as string);
 
   try {
     const response = await axios.get<SummonerData>(
@@ -56,20 +60,21 @@ export async function execute(interaction: CommandInteraction) {
 
     const summonerData = response.data;
 
-    const user = {
+    const userUpdate = {
       gameName: summonerData.gameName,
       tagLine: summonerData.tagLine,
       region,
       server,
       puuid: summonerData.puuid,
       id_discord: interaction.user.id,
+      id: user.id,
     };
 
-    await createUserData(user);
+    await updateUserData(userUpdate);
 
-    interaction.reply(messages.useSetted);
+    interaction.reply(messages.userUpdated);
   } catch (error) {
     console.log(error);
-    interaction.reply(messages.errorCreate);
+    interaction.reply(messages.errorUpdate);
   }
 }

@@ -6,8 +6,11 @@ import {
   RawResponse,
   SummonerData,
   SummonerV4,
-} from "src/commands/league/types/type";
-import { config } from "src/config/config";
+} from "../../commands/league/types/type";
+import { config } from "../../config/config";
+import { ChampionData } from "../../entities/Champion";
+import { MasteryChampionInfo } from "../../entities/Mastery";
+import { CurrentGameInfo } from "../../entities/Spectate";
 
 export const getLatestVersion = async (): Promise<string> => {
   const response = await axios.get(
@@ -125,4 +128,58 @@ export const getSummerbyNameTag = async (
   );
 
   return response;
+};
+
+export const getChampionData = async (
+  version: string,
+  champion: string
+): Promise<ChampionData[string]> => {
+  const response = await axios.get(
+    `https://ddragon.leagueoflegends.com/cdn/${version}/data/pt_BR/champion/${champion}.json`
+  );
+
+  return response.data.data[champion];
+};
+
+export const getMasteries = async (
+  puuid: string,
+  server: string,
+  count: number = 3
+): Promise<MasteryChampionInfo[]> => {
+  const response = await axios.get(
+    `https://${server}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/top?count=${count}`,
+    {
+      headers: {
+        "X-Riot-Token": config.RIOT_API_KEY,
+      },
+    }
+  );
+
+  return response.data;
+};
+
+export const getAllChampions = async (
+  version: string
+): Promise<ChampionData> => {
+  const response = await axios.get(
+    `https://ddragon.leagueoflegends.com/cdn/${version}/data/pt_BR/champion.json`
+  );
+
+  return response.data.data;
+};
+
+export const getActiveGame = async (
+  summonerId: string,
+  server: string
+): Promise<CurrentGameInfo> => {
+  const response = await axios.get(
+    `https://${server}.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${summonerId}`,
+    {
+      headers: {
+        "X-Riot-Token": config.RIOT_API_KEY,
+      },
+    }
+  );
+
+  return response.data;
 };
