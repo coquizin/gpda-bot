@@ -6,9 +6,9 @@ import {
   ActionRowBuilder,
   ComponentType,
 } from "discord.js";
-import riotUtils from "../../utils/utilsLeague";
-import { messages } from "../../utils/messages";
-import { getChampionData, getLatestVersion } from "../../service/riot";
+import riotUtils from "@utils/utilsLeague";
+import { messages } from "@utils/messages";
+import { getChampionData, getLatestVersion } from "@service/riot";
 
 export const data = new SlashCommandBuilder()
   .setName("skin")

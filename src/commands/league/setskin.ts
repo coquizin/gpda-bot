@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
-import { getUserData } from "../../service/supabase/user";
-import { messages } from "../../utils/messages";
-import { updateSkin } from "../../service/supabase/profile_style";
+import { getUserData } from "@service/supabase/user";
+import { messages } from "@utils/messages";
+import { updateSkin } from "@service/supabase/profile_style";
 
 export const data = new SlashCommandBuilder()
   .setName("setskin")

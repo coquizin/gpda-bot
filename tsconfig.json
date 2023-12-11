@@ -3,6 +3,7 @@
     "target": "ESNext",
     "module": "commonjs",
     "rootDir": "./src/",
+    "baseUrl": "./src",
     "outDir": "./dist/",
     "strict": true,
     "moduleResolution": "node",
@@ -16,9 +17,19 @@
     "removeComments": true,
     "typeRoots": ["node_modules/@types"],
     "sourceMap": false,
-    "baseUrl": "./"
+    "incremental": true,
+    "paths": {
+      "@/*": ["./*"],
+      "@src/*": ["./*"],
+      "@config/*": ["./config/*"],
+      "@commands/*": ["./commands/*"],
+      "@events/*": ["./events/*"],
+      "@entities/*": ["./entities/*"],
+      "@utils/*": ["./utils/*"],
+      "@service/*": ["./service/*"]
+    }
   },
-  "files": ["src/index.ts"],
+  "files": ["src/Bot.ts"],
   "include": ["./**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

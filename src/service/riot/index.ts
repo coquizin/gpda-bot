@@ -6,11 +6,11 @@ import {
   RawResponse,
   SummonerData,
   SummonerV4,
-} from "../../commands/league/types/type";
-import { config } from "../../config/config";
-import { ChampionData } from "../../entities/Champion";
-import { MasteryChampionInfo } from "../../entities/Mastery";
-import { CurrentGameInfo } from "../../entities/Spectate";
+} from "@commands/league/types/type";
+import { config } from "@config/config";
+import { ChampionData } from "@entities/Champion";
+import { MasteryChampionInfo } from "@entities/Mastery";
+import { CurrentGameInfo } from "@entities/Spectate";
 
 export const getLatestVersion = async (): Promise<string> => {
   const response = await axios.get(

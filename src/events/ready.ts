@@ -1,6 +1,6 @@
 import { Client } from "discord.js";
-import { config } from "../config/config";
-import { deployCommands } from "../deploy-command";
+import { config } from "@config/config";
+import { deployCommands } from "@src/deploy-command";
 
 export default (client: Client): void => {
   client.on("ready", async () => {

@@ -1,9 +1,9 @@
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
 import axios from "axios";
-import { config } from "../../config/config";
-import riotUtils from "../../utils/utilsLeague";
-import { createUserData, getUserData } from "../../service/supabase/user";
-import { messages } from "../../utils/messages";
+import { config } from "@config/config";
+import riotUtils from "@utils/utilsLeague";
+import { createUserData, getUserData } from "@service/supabase/user";
+import { messages } from "@utils/messages";
 import { SummonerData } from "./types/type";
 
 export const data = new SlashCommandBuilder()

@@ -1,16 +1,12 @@
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
-import riotUtils from "../../utils/utilsLeague";
-import { getUserData } from "../../service/supabase/user";
-import { messages } from "../../utils/messages";
-import {
-  getAllChampions,
-  getLatestVersion,
-  getMasteries,
-} from "../../service/riot";
+import riotUtils from "@utils/utilsLeague";
+import { getUserData } from "@service/supabase/user";
+import { messages } from "@utils/messages";
+import { getAllChampions, getLatestVersion, getMasteries } from "@service/riot";
 import axios from "axios";
 import { SummonerData } from "./types/type";
-import { config } from "../../config/config";
-import { getUserStyle } from "../../service/supabase/profile_style";
+import { config } from "@config/config";
+import { getUserStyle } from "@service/supabase/profile_style";
 
 export const data = new SlashCommandBuilder()
   .setName("lolprofile")

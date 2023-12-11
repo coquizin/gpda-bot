@@ -1,13 +1,13 @@
 import { EmbedBuilder } from "discord.js";
-import { MatchHistory } from "../commands/league/types/type";
-import { UserData } from "../entities/User";
+import { MatchHistory } from "@commands/league/types/type";
+import { UserData } from "@entities/User";
 import {
   getLatestVersion,
   getLeagueSummoner,
   getRankedInfo,
-} from "../service/riot";
-import { ChampionData } from "../entities/Champion";
-import { CurrentGameInfo } from "../entities/Spectate";
+} from "@service/riot";
+import { ChampionData } from "@entities/Champion";
+import { CurrentGameInfo } from "@entities/Spectate";
 
 const riotUtils = {
   getRegion: function (server: string): string {

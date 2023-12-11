@@ -11,6 +11,9 @@
     "lint": "eslint . --ext ts --fix"
   },
   "keywords": [],
+  "lint-staged": {
+    "./src/**/*.{ts}": []
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {

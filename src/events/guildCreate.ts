@@ -1,5 +1,5 @@
 import { Client } from "discord.js";
-import { deployCommands } from "../deploy-command";
+import { deployCommands } from "@src/deploy-command";
 
 export default (client: Client): void => {
   client.on("guildCreate", async (guild) => {

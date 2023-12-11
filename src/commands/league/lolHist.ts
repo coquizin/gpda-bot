@@ -6,15 +6,15 @@ import {
   ActionRowBuilder,
   ComponentType,
 } from "discord.js";
-import riotUtils from "../../utils/utilsLeague";
-import { getUserData } from "../../service/supabase/user";
-import { messages } from "../../utils/messages";
+import riotUtils from "@utils/utilsLeague";
+import { getUserData } from "@service/supabase/user";
+import { messages } from "@utils/messages";
 import {
   createMatchHistory,
   getSummerbyNameTag,
   listMatch,
-} from "../../service/riot";
-import { UserData } from "src/entities/User";
+} from "@service/riot";
+import { UserData } from "@entities/User";
 
 export const data = new SlashCommandBuilder()
   .setName("lolhist")
