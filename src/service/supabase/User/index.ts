@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
-import { config } from "../../../config/config";
-import { UserData } from "../../../entities/User";
+import { config } from "@config/config";
+import { UserData } from "@entities/User";
 
 const supabaseUrl = config.SUPABASE_URL;
 const supabaseKey = config.SUPABASE_KEY;
