@@ -15,4 +15,6 @@ export const messages = {
   skinFetchError:
     "Erro ao tentar buscar a skin, verifique a ortografia e tente novamente!",
   userNotInGame: "Usuário não está em uma partida!",
+  noPrompt: "Você precisa preencher o prompt!",
+  noAnswer: "Não foi possível obter uma resposta do GPT-3!",
 };

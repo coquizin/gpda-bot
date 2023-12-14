@@ -1,5 +1,5 @@
 import { EmbedBuilder } from "discord.js";
-import { MatchHistory } from "@commands/league/types/type";
+import { MatchHistory, UserSpec } from "@commands/league/types/type";
 import { UserData } from "@entities/User";
 import {
   getLatestVersion,
@@ -200,7 +200,6 @@ const riotUtils = {
 
     const embed = new EmbedBuilder()
       .setColor("#0099ff")
-      .setTimestamp()
       .setAuthor({
         name: `${championData.name} - ${championData.skins[currentPage].name}`,
         iconURL: championSquareImage,
@@ -292,7 +291,6 @@ const riotUtils = {
         }
       )
       .setImage(championImage)
-      .setTimestamp()
       .setFooter({
         text: "GPDA BOT",
         iconURL: "https://i.imgur.com/AfFp7pu.png",
@@ -303,7 +301,7 @@ const riotUtils = {
 
   createEmbedMatch: async function (
     activeMatch: CurrentGameInfo,
-    usersData: any,
+    usersData: UserSpec[],
     currentPage: number
   ) {
     const color = currentPage === 0 ? "#0099ff" : "#ff0000";
@@ -321,7 +319,7 @@ const riotUtils = {
         {
           name: "Nicks",
           value: usersData
-            .map((player: any) => {
+            .map((player) => {
               if (player.teamId === (currentPage + 1) * 100) {
                 return `${player.summonerName}`;
               }
@@ -332,7 +330,7 @@ const riotUtils = {
         {
           name: "Winrate",
           value: usersData
-            .map((player: any) => {
+            .map((player) => {
               if (player.teamId === (currentPage + 1) * 100) {
                 return `${player.winrate}%`;
               }
@@ -343,9 +341,20 @@ const riotUtils = {
         {
           name: "RANK",
           value: usersData
-            .map((player: any) => {
+            .map((player) => {
               if (player.teamId === (currentPage + 1) * 100) {
                 return `${player.tier} ${player.rank} ${player.lp} LP`;
+              }
+            })
+            .join("\n"),
+          inline: true,
+        },
+        {
+          name: "Campeão",
+          value: usersData
+            .map((player) => {
+              if (player.teamId === (currentPage + 1) * 100) {
+                return `${player.championName}`;
               }
             })
             .join("\n"),

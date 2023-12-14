@@ -11,6 +11,8 @@ import { getUserData } from "@service/supabase/user";
 import { messages } from "@utils/messages";
 import {
   getActiveGame,
+  getAllChampions,
+  getLatestVersion,
   getLeagueSummoner,
   getRankedInfo,
   getSummerbyNameTag,
@@ -118,6 +120,9 @@ export async function execute(interaction: CommandInteraction) {
       userData.server
     );
 
+    const latestVersion = await getLatestVersion();
+    const allChampions = await getAllChampions(latestVersion);
+
     const activeMatch = await getActiveGame(summonerData.id, userData.server);
 
     const usersData: any = [];
@@ -139,10 +144,20 @@ export async function execute(interaction: CommandInteraction) {
           : "N/A";
       const lp = leagueInfo ? leagueInfo.leaguePoints.toString() : 0;
 
+      const championId = player.championId;
+      let championName = "";
+      for (const champion in allChampions) {
+        if (allChampions[champion].key === championId.toString()) {
+          championName = allChampions[champion].id;
+          break;
+        }
+      }
+
       const user = {
         summonerName: player.summonerName,
         teamId: player.teamId,
         championId: player.championId,
+        championName: championName,
         tier,
         rank,
         lp,

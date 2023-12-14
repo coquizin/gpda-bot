@@ -1,3 +1,5 @@
+import exp from "constants";
+
 export interface Match {
   metadata: Metadata;
   info: Info;
@@ -214,4 +216,17 @@ export interface SummonerData {
   gameName: string;
   tagLine: string;
   puuid: string;
+}
+
+export interface UserSpec {
+  summonerName: string;
+  teamId: number;
+  championId: string;
+  championName: string;
+  tier: string;
+  rank: string;
+  lp: string;
+  winrate: string;
+  wins: number;
+  losses: number;
 }

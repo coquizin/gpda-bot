@@ -13,6 +13,8 @@ const {
   JWT_SECRET,
   EMAIL,
   SENHA,
+  GPT_KEY,
+  NEWS_KEY,
 } = process.env;
 
 if (
@@ -25,7 +27,9 @@ if (
   !SUPABASE_KEY ||
   !JWT_SECRET ||
   !EMAIL ||
-  !SENHA
+  !SENHA ||
+  !GPT_KEY ||
+  !NEWS_KEY
 ) {
   throw new Error("Missing environment variables");
 }
@@ -41,4 +45,6 @@ export const config = {
   JWT_SECRET,
   EMAIL,
   SENHA,
+  GPT_KEY,
+  NEWS_KEY,
 };

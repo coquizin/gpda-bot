@@ -10,6 +10,8 @@ import * as skinUpModule from "./league/setskin";
 import * as skinModule from "./league/skin";
 import * as lolProfileModule from "./league/lolprofile";
 import * as lolSpecModule from "./league/lolspec";
+import * as perguntaModule from "./gpt/gpt";
+import * as newsModule from "./news/news";
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
 
 // Definindo tipos para os módulos
@@ -31,6 +33,8 @@ interface Commands {
   skin: Command;
   lolprofile: Command;
   lolspec: Command;
+  pergunta: Command;
+  news: Command;
 }
 
 // Criando um objeto com os módulos e suas propriedades de comando
@@ -47,4 +51,6 @@ export const commands: Commands = {
   skin: skinModule,
   lolprofile: lolProfileModule,
   lolspec: lolSpecModule,
+  pergunta: perguntaModule,
+  news: newsModule,
 };

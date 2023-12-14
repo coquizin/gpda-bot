@@ -28,6 +28,7 @@
     "dotenv": "^16.3.1",
     "ffmpeg-static": "^5.2.0",
     "libsodium-wrappers": "^0.7.13",
+    "openai": "^4.20.1",
     "random": "^4.1.0",
     "ts-node": "^10.9.1",
     "undici": "^5.28.2"
