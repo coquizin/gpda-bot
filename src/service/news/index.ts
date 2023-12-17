@@ -1,4 +1,4 @@
-import { NewsResponse } from "@/entities/News";
+import { NewsResponse } from "@entities/News";
 import { config } from "@config/config";
 import axios from "axios";
 

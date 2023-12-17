@@ -7,9 +7,8 @@ import {
   ComponentType,
 } from "discord.js";
 import { messages } from "@utils/messages";
-import { askGPT } from "@/service/gpt";
-import { getEveryNews, getTopNews } from "@/service/news";
-import { newsEmbed } from "@/utils/news";
+import { getEveryNews } from "@service/news";
+import { newsEmbed } from "@utils/news";
 
 export const data = new SlashCommandBuilder()
   .setName("news")

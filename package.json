@@ -5,7 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "start": "ts-node src/index.ts",
+    "start": "tsx src/index.ts",
     "build": "tsup src/index.ts --minify",
     "format": "prettier --write \"**/*.{json,ts}\"",
     "lint": "eslint . --ext ts --fix"
@@ -31,6 +31,7 @@
     "openai": "^4.20.1",
     "random": "^4.1.0",
     "ts-node": "^10.9.1",
+    "tsconfig-paths": "^4.2.0",
     "undici": "^5.28.2"
   },
   "devDependencies": {

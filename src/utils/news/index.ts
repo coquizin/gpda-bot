@@ -1,4 +1,4 @@
-import { News } from "@/entities/News";
+import { News } from "@entities/News";
 import { EmbedBuilder } from "discord.js";
 
 export const newsEmbed = (news: News) => {

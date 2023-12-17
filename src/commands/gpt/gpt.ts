@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
 import { messages } from "@utils/messages";
-import { askGPT } from "@/service/gpt";
+import { askGPT } from "@service/gpt";
 
 export const data = new SlashCommandBuilder()
   .setName("pergunta")
