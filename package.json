@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",
-    "build": "tsup src/index.ts --minify",
+    "build": "tsx src/index.ts",
     "format": "prettier --write \"**/*.{json,ts}\"",
     "lint": "eslint . --ext ts --fix"
   },
