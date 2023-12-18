@@ -19,7 +19,6 @@
     "sourceMap": false,
     "incremental": true,
     "paths": {
-      "@/*": ["./*"],
       "@src/*": ["./*"],
       "@config/*": ["./config/*"],
       "@commands/*": ["./commands/*"],
@@ -29,7 +28,7 @@
       "@service/*": ["./service/*"]
     }
   },
-  "files": ["src/Bot.ts"],
+  "files": ["src/index.ts"],
   "include": ["./**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

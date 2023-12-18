@@ -3,7 +3,6 @@ import { config } from "@config/config";
 
 const supabaseUrl = config.SUPABASE_URL;
 const supabaseKey = config.SUPABASE_KEY;
-const jwtToken = config.JWT_SECRET;
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
